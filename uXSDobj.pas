@@ -93,39 +93,39 @@ type
 
 {(*}
 const
-  xsSchema         = 'xs:schema';
+//  xsSchema         = 'xs:schema';
   xsSchema1        = 'schema';
-  xsElement        = 'xs:element';
+//  xsElement        = 'xs:element';
   xsElement1       = 'element';
-  xsImport         = 'xs:import';
+//  xsImport         = 'xs:import';
   xsImport1        = 'import';
   xseName          = 'name';
   xseType          = 'type';
   xseRef           = 'ref';
-  xsAttribute      = 'xs:attribute';
+//  xsAttribute      = 'xs:attribute';
   xsAttribute1     = 'attribute';
-  xsSequence       = 'xs:sequence';
+//  xsSequence       = 'xs:sequence';
   xsSequence1      = 'sequence';
-  xsComplexType    = 'xs:complexType';
+//  xsComplexType    = 'xs:complexType';
   xsComplexType1   = 'complexType';
-  xsSimpleType     = 'xs:simpleType';
+//  xsSimpleType     = 'xs:simpleType';
   xsSimpleType1    = 'simpleType';
-  xsSimpleContent  = 'xs:simpleContent';
+//  xsSimpleContent  = 'xs:simpleContent';
   xsSimpleContent1 = 'simpleContent';
-  xsExtension      = 'xs:extension';
+//  xsExtension      = 'xs:extension';
   xsExtension1     = 'extension';
-  xsRestriction    = 'xs:restriction';
+//  xsRestriction    = 'xs:restriction';
   xsRestriction1   = 'restriction';
-  xsEnumeration    = 'xs:enumeration';
+//  xsEnumeration    = 'xs:enumeration';
   xsEnumeration1   = 'enumeration';
   xsRsBase         = 'base';
   xsminoccurs      = 'minOccurs';
   xsmaxoccurs      = 'maxOccurs';
   xsmunbounded     = 'unbounded';
-  xschoice         = 'xs:choice';
+//  xschoice         = 'xs:choice';
   xschoice1        = 'choice';
   xsuse            = 'use';
-  xseuse           = 'xs:use';
+//  xseuse           = 'xs:use';
 
 const // xml datatypes
   tpString       = 'xs:string';
@@ -173,9 +173,9 @@ const // delphi types
   dInteger  = 'integer';
   dLong     = 'int64';
   dboolean  = 'boolean';
-  dDate     = 'tDate';
-  dTime     = 'tTime';
-  dDateTime = 'tDateTime';
+  dDate     = 'TDate';
+  dTime     = 'TTime';
+  dDateTime = 'TDateTime';
   dbyte     = 'byte';
 
 const
@@ -451,7 +451,6 @@ var
   begin
     if length(s) > 0 then
       lBuilder.WriteString(s);
-//      aStream.WriteBuffer(Pointer(s)^, length(s));
   end;
 
   procedure outline(const s: string);

@@ -263,7 +263,7 @@ var
   i: integer;
 begin
   mmCode.Lines.Clear;
-  if (dom.name = xsschema) or (dom.name = xsschema1) then
+  if (dom.name = xsschema1)then
     parseSchema(dom)
   else if Namepart(dom.name) = 'definitions' then
     parseWSDL(dom)

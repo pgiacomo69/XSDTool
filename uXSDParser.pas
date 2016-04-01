@@ -125,7 +125,7 @@ var
   sVal: string;
 begin
   Logout('parseRestriction');
-  xEnum := xRest.getChildByName(xsEnumeration);
+  xEnum := xRest.getChildByName(xsEnumeration1);
   if Assigned(xEnum) then
     Logout('xEnum: ')
   else
@@ -174,7 +174,7 @@ begin
     sElement := xSimple.attribute[xsename]
   else
     sElement := '';
-  xRest := xSimple.getChildByName(xsrestriction);
+  xRest := xSimple.getChildByName(xsrestriction1);
   if assigned(xRest) then
   begin
     pt := xRest.attribute[xsRsBase];
@@ -215,7 +215,7 @@ begin // procedure parseProperties(dn: tJanXMLNode2);
   else
     iMax := StrToIntDef(sNs, cScalar);
 
-  xn := dn.getChildByName(xsrestriction);
+  xn := dn.getChildByName(xsrestriction1);
   if assigned(xn) then
   begin
     sType := xn.attribute[xsRsBase];
@@ -279,7 +279,7 @@ var
   dn2: tJanXMLNode2;
 begin
   Logout('// parse SimpleContent');
-  xExt := dn.getChildByName(xsextension);
+  xExt := dn.getChildByName(xsextension1);
   if assigned(xExt) then
   begin
     pt := xExt.attribute[xsRsBase];
@@ -365,7 +365,7 @@ begin
     Logout('  *)');
 
     // we need to create a property of the current declaration
-    p := tProperty.Create(sName, 't' + sName, b, '', iMax, iMin, false);
+    p := tProperty.Create(sName, 'T' + sName, b, '', iMax, iMin, false);
     FCurrentClass.Properties.AddObject(p.name, p);
   end;
 end;
@@ -381,13 +381,13 @@ begin
   Logout('// parseAttribute');
   sName := xAttribute.attribute[xsename];
   sType := xAttribute.attribute[xsetype];
-  if xAttribute.attribute[xseuse]='required' then
+  if xAttribute.attribute[xsuse]='required' then
     iMin := 1
   else
     iMin := 0; // default optional
   if sType = '' then
   begin
-    xn := xAttribute.getChildByName(xsrestriction, true);
+    xn := xAttribute.getChildByName(xsrestriction1, true);
     if assigned(xn) then
     begin
       sType := xn.attribute[xsRsBase];
@@ -427,7 +427,7 @@ var
       b := 'E'
     else
       b := 'X';
-    p := tProperty.Create(sRef, 't' + sRef, b, sns, iMax, iMin, false);
+    p := tProperty.Create(sRef, 'T' + sRef, b, sns, iMax, iMin, false);
     FCurrentClass.Properties.AddObject(p.name, p);
   end;
 

@@ -36,6 +36,10 @@ object Form1: TForm1
     object tsXML: TTabSheet
       Caption = 'XML'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmXML: TMemo
         Left = 0
         Top = 0
@@ -50,6 +54,10 @@ object Form1: TForm1
     end
     object tsTree: TTabSheet
       Caption = 'Tree'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object tree: TTreeView
         Left = 0
         Top = 0
@@ -63,6 +71,10 @@ object Form1: TForm1
     object tsCode: TTabSheet
       Caption = 'Code'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmCode: TMemo
         Left = 0
         Top = 0
@@ -78,6 +90,10 @@ object Form1: TForm1
     object tsLog: TTabSheet
       Caption = 'Log'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmLog: TMemo
         Left = 0
         Top = 0

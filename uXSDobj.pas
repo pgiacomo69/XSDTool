@@ -3,7 +3,8 @@ unit uXSDobj;
 interface
 uses
   Classes,
-  uXMLTools;
+  uXMLTools
+  ;
 {#BACKUP g:\proj5\delphi32\uxmlTools.pas }
 
 const
@@ -11,6 +12,9 @@ const
   cunqualified = 'unqualified';
 
 type
+
+  TXSDVisitor = class; // forward
+  
   tProperty = class
   private
     FBase: string;
@@ -25,6 +29,7 @@ type
   public
     constructor Create(const aName, aType, aBase, aNSpc: string;
       aMax, aMin: integer; bSimple: boolean);
+	//procedure AcceptVisitor(aVisitor: TXSDVisitor);
     property Name: string read FName;
     property _Type: string read FType;
     property Base: string read FBase;
@@ -74,6 +79,8 @@ type
     procedure AddConst(const sPrefix, sValue: string);
     procedure AddInclude(const sAlias, sNamespace: string);
     procedure SaveToStream(aStream: tStream);
+	
+	procedure AcceptVisitor(aVisitor: TXSDVisitor);
     //
     property Ordinals: tStringlist read FOrdinals; //  write FOrdinals;
     property Consts: tStringlist read FConsts; //  write FConsts;
@@ -90,6 +97,16 @@ type
     property XSDTimestamp: string read FXSDTimestamp write FXSDTimestamp;
     property XSDFilename: string read FXSDFilename write FXSDFilename;
   end;
+  
+    // Abstract base defintion of Visitor pattern that can work on XSD schema in TClassdefs and subclasses
+  // Concrete implementations i.e. in uXSDVisitor unit
+  TXSDVisitor = class abstract(TObject);
+  public
+    procedure Visit(aSchema: TClassDefs); abstract; virtual;
+	// procedure Visit(aClass: TClassDef);
+	// procedure Visit(aProperty: TProperty);
+  end;
+  
 
 {(*}
 const
@@ -1080,5 +1097,10 @@ begin
   end;
 end;
 
+procedure tClassDefs.AcceptVisitor(aVisitor: TXSDVisitor);
+begin
+	aVisitor.Visit(self);
+end;
+    
 end.
 

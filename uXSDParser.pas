@@ -42,7 +42,9 @@ type
 implementation
 uses
   SysUtils,
-  mylib;
+  mylib
+  , uXSDVisitor
+  ;
 
 procedure tXSDParser.Logout(const s: string);
 begin
@@ -628,12 +630,19 @@ begin
 end;
 
 procedure tXSDParser.SaveToStream(aStream: tStream);
+var	
+  lPascalGenerator: TXSDPascalGeneratorVisitor;
 begin
   FClassDefs.XSDFilename := FFilename;
   if FileExists(FFilename) then
-    FClassDefs.XSDTimeStamp := FormatDateTime('c',
-      FileDateToDateTime(FileAge(FFilename)));
-  FClassDefs.SaveToStream(aStream);
+    FClassDefs.XSDTimeStamp := FormatDateTime('c', FileDateToDateTime(FileAge(FFilename)));
+
+  lPascalGenerator := TXSDPascalGeneratorVisitor.Create(aStream);
+  try
+	FClassDefs.AcceptVisitor(lPascalGenerator);
+  finally
+    lPascalGenerator.Free;
+  end;
 end;
 
 end.

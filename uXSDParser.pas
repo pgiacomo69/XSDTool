@@ -30,6 +30,8 @@ type
     procedure parseAttribute(xAttribute: tJanXMLNode2);
     procedure parseElement(xElement: tJanXMLNode2; bInclass: boolean);
     procedure parseImport(xn: tJanXMLNode2);
+    procedure parsecomplexContent(dn: tJanXMLNode2);
+    procedure parseExtension(dn: tJanXMLNode2);
   public
     constructor Create(const aFilename: string);
     destructor Destroy; override;
@@ -269,6 +271,32 @@ begin
   end;
 end;
 
+procedure tXSDParser.parseExtension(dn: tJanXMLNode2);
+begin
+  FCurrentClass.IsExtensionOf := dn.attribute['base'];
+
+end;
+
+procedure tXSDParser.parsecomplexContent(dn: tJanXMLNode2);
+var
+  i: integer;
+  dn2: TjanXMLNode2;
+  Extname: string;
+begin
+  for i := 0 to dn.nodes.count - 1 do
+  begin
+    dn2 := tJanXMLNode2(dn.Nodes[i]);
+    if dn2.name = xsExtension1 then
+      parseExtension(dn2)
+//    else if dn2.name = xsRestriction1 then
+//      parseRestriction(dn2)
+    else
+      Logout('// --- parseSequence.node: ' + dn2.attribute[xsename]);
+  end;
+
+end;
+
+
 procedure tXSDParser.parseSimpleContent(dn: tJanXMLNode2;
   bInClass: boolean);
 var
@@ -292,7 +320,11 @@ begin
     begin
       dn2 := tJanXMLNode2(xExt.Nodes[c]);
       if dn2.name = xsattribute1 then
-        parseattribute(dn2);
+        parseattribute(dn2)
+      else if dn2.name = xsExtension1 then
+        parseExtension(dn2);
+
+
     end;
   end;
 end;
@@ -354,6 +386,8 @@ begin
       parseSimplecontent(dn2, bInClass)
     else if dn2.name = xsattribute1 then
       parseattribute(dn2)
+    else if dn2.name = xscomplexContent then
+      parsecomplexcontent(dn2)
     else
       ;
   end;

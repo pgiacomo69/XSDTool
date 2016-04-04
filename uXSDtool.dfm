@@ -33,13 +33,10 @@ object Form1: TForm1
     Align = alClient
     TabOrder = 1
     OnChange = PageControl1Change
+    ExplicitTop = 23
     object tsXML: TTabSheet
       Caption = 'XML'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object mmXML: TMemo
         Left = 0
         Top = 0
@@ -50,14 +47,11 @@ object Form1: TForm1
           'mmXML')
         ScrollBars = ssBoth
         TabOrder = 0
+        OnChange = mmXMLChange
       end
     end
     object tsTree: TTabSheet
       Caption = 'Tree'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object tree: TTreeView
         Left = 0
         Top = 0
@@ -71,10 +65,6 @@ object Form1: TForm1
     object tsCode: TTabSheet
       Caption = 'Code'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object mmCode: TMemo
         Left = 0
         Top = 0
@@ -90,10 +80,6 @@ object Form1: TForm1
     object tsLog: TTabSheet
       Caption = 'Log'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object mmLog: TMemo
         Left = 0
         Top = 0
@@ -109,7 +95,6 @@ object Form1: TForm1
         ReadOnly = True
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitTop = -3
       end
     end
   end

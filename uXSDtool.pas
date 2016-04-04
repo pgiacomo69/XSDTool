@@ -96,6 +96,7 @@ type
     procedure MRUMRUItemClick(Sender: TObject; AFilename: string);
     procedure acWordwrapExecute(Sender: TObject);
     procedure acFindExecute(Sender: TObject);
+    procedure mmXMLChange(Sender: TObject);
   private
     { Private-Deklarationen }
     dom: tJanXMLParser2;
@@ -129,6 +130,7 @@ var
 implementation
 uses
   Registry,
+  janStrings,
   shellapi,
   uXMLtools,
   uXSDobj,
@@ -297,12 +299,9 @@ begin
   tree.items.BeginUpdate;
   tree.items.clear;
 
-  dom.LoadXML(fn_xsd);
-  mmXML.Text := dom.xml;
   mmCode.Lines.Clear;
   bChanged := false;
-
-  parsetree;
+  mmXML.Text := LoadString(fn_xsd);
 
   tree.items.EndUpdate;
   tree.FullExpand;
@@ -447,6 +446,15 @@ begin
   // in case we allow editing, which is not allowed by now.
   bChanged := true;
   SetActiveActions;
+end;
+
+procedure TForm1.mmXMLChange(Sender: TObject);
+begin
+  dom.xml := mmXML.Lines.Text;
+  bChanged := false;
+
+  parsetree;
+
 end;
 
 procedure TForm1.parsewsdl(xSchema: tJanXMLNode2);

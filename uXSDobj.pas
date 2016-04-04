@@ -41,6 +41,7 @@ type
   private
     FName: string;
     FProperties: TStringlist;
+    FIsExtensionOf: string;
   public
     constructor Create(const aName: string);
     destructor Destroy; override;
@@ -48,6 +49,7 @@ type
     function NumElementProperties: integer;
     property Properties: TStringList read FProperties;
     property Name: string read FName;
+    property IsExtensionOf: string read FIsExtensionOf write FIsExtensionOf;
   end;
 
 type
@@ -126,6 +128,7 @@ const
   xschoice1        = 'choice';
   xsuse            = 'use';
 //  xseuse           = 'xs:use';
+  xscomplexcontent  = 'complexContent';
 
 const // xml datatypes
   tpString       = 'xs:string';
@@ -446,6 +449,7 @@ var
   bCallSimpleConstructor: boolean;
   bQualified: boolean;
   lBuilder: TStringStream;
+  lIsInheritedClass: boolean;
 
   procedure oute(const s: string);
   begin
@@ -559,7 +563,15 @@ begin
 
       outline('');
       outline(tabtype);
-      outline(tabClass + 'T' + aClass.Name + ' = class');
+      lIsInheritedClass := not aClass.IsExtensionOf.IsEmpty;
+      if lIsInheritedClass then
+        outline(tabClass + 'T' + aClass.Name + ' = class(' + aClass.IsExtensionOf + ')')
+      else
+        outline(tabClass + 'T' + aClass.Name + ' = class');
+
+
+
+
 
       // =======================
       // write private variables
@@ -567,6 +579,7 @@ begin
 
       outline(tabprivate);
       outline('    F_NameSpaceAlias: string;');
+
       for p := 0 to aClass.Properties.Count - 1 do
       begin
         aProp := tProperty(aClass.Properties.Objects[p]);
@@ -606,12 +619,14 @@ begin
       end;
 
       outline(tabpublic);
+
       outline(tabConstrC);
       outline(tabConstrN);
       outline(tabdestr);
       outline('    class function _nsURI_:string;');
       outline(tabSave);
       outline(tabProp + '_NameSpaceAlias: string read F_NameSpaceAlias write F_NameSpaceAlias;');
+
       for p := 0 to aClass.Properties.Count - 1 do
       begin
         aProp := tProperty(aClass.Properties.Objects[p]);

@@ -33,21 +33,53 @@ object Form1: TForm1
     Align = alClient
     TabOrder = 1
     OnChange = PageControl1Change
-    ExplicitTop = 23
     object tsXML: TTabSheet
       Caption = 'XML'
       ImageIndex = 1
-      object mmXML: TMemo
+      object mmXML: TSynMemo
         Left = 0
         Top = 0
         Width = 666
         Height = 311
         Align = alClient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Courier New'
+        Font.Style = []
+        TabOrder = 0
+        CodeFolding.GutterShapeSize = 11
+        CodeFolding.CollapsedLineColor = clGrayText
+        CodeFolding.FolderBarLinesColor = clGrayText
+        CodeFolding.IndentGuidesColor = clGray
+        CodeFolding.IndentGuides = True
+        CodeFolding.ShowCollapsedLine = False
+        CodeFolding.ShowHintMark = True
+        UseCodeFolding = False
+        Gutter.Font.Charset = DEFAULT_CHARSET
+        Gutter.Font.Color = clWindowText
+        Gutter.Font.Height = -11
+        Gutter.Font.Name = 'Terminal'
+        Gutter.Font.Style = []
+        Gutter.ShowLineNumbers = True
+        Gutter.UseFontStyle = False
+        HideSelection = True
+        Highlighter = SynXMLSyn1
         Lines.Strings = (
           'mmXML')
-        ScrollBars = ssBoth
-        TabOrder = 0
+        ReadOnly = True
         OnChange = mmXMLChange
+        FontSmoothing = fsmNone
+        RemovedKeystrokes = <
+          item
+            Command = ecContextHelp
+            ShortCut = 112
+          end>
+        AddedKeystrokes = <
+          item
+            Command = ecContextHelp
+            ShortCut = 16496
+          end>
       end
     end
     object tsTree: TTabSheet
@@ -65,16 +97,50 @@ object Form1: TForm1
     object tsCode: TTabSheet
       Caption = 'Code'
       ImageIndex = 2
-      object mmCode: TMemo
+      object mmCode: TSynMemo
         Left = 0
         Top = 0
         Width = 666
         Height = 311
         Align = alClient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Courier New'
+        Font.Style = []
+        TabOrder = 0
+        CodeFolding.GutterShapeSize = 11
+        CodeFolding.CollapsedLineColor = clGrayText
+        CodeFolding.FolderBarLinesColor = clGrayText
+        CodeFolding.IndentGuidesColor = clGray
+        CodeFolding.IndentGuides = True
+        CodeFolding.ShowCollapsedLine = False
+        CodeFolding.ShowHintMark = True
+        UseCodeFolding = False
+        Gutter.Font.Charset = DEFAULT_CHARSET
+        Gutter.Font.Color = clWindowText
+        Gutter.Font.Height = -11
+        Gutter.Font.Name = 'Terminal'
+        Gutter.Font.Style = []
+        Gutter.ShowLineNumbers = True
+        Gutter.UseFontStyle = False
+        HideSelection = True
+        Highlighter = SynPasSyn1
         Lines.Strings = (
           'mmCode')
-        ScrollBars = ssBoth
-        TabOrder = 0
+        ReadOnly = True
+        OnChange = mmCodeChange
+        FontSmoothing = fsmNone
+        RemovedKeystrokes = <
+          item
+            Command = ecContextHelp
+            ShortCut = 112
+          end>
+        AddedKeystrokes = <
+          item
+            Command = ecContextHelp
+            ShortCut = 16496
+          end>
       end
     end
     object tsLog: TTabSheet
@@ -182,7 +248,7 @@ object Form1: TForm1
   end
   object f: TMainMenu
     Images = ImageList1
-    Left = 104
+    Left = 76
     Top = 80
     object File1: TMenuItem
       Caption = 'File'
@@ -229,6 +295,10 @@ object Form1: TForm1
         Caption = 'prompt after save'
         OnClick = promptaftersave1Click
       end
+    end
+    object About1: TMenuItem
+      Caption = 'About'
+      OnClick = About1Click
     end
   end
   object ActionList1: TActionList
@@ -290,10 +360,10 @@ object Form1: TForm1
     end
   end
   object ImageList1: TImageList
-    Left = 132
-    Top = 141
+    Left = 76
+    Top = 137
     Bitmap = {
-      494C010108000D00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00140010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -698,11 +768,32 @@ object Form1: TForm1
   end
   object FindDialog1: TFindDialog
     Options = [frDown, frDisableUpDown, frDisableWholeWord]
-    Left = 196
-    Top = 117
+    Left = 184
+    Top = 153
+  end
+  object SynXMLSyn1: TSynXMLSyn
+    DefaultFilter = 
+      'XML Document (*.xml,*.xsd,*.xsl,*.xslt,*.dtd)|*.xml;*.xsd;*.xsl;' +
+      '*.xslt;*.dtd'
+    Options.AutoDetectEnabled = False
+    Options.AutoDetectLineLimit = 0
+    Options.Visible = False
+    WantBracesParsed = False
+    Left = 252
+    Top = 85
+  end
+  object SynPasSyn1: TSynPasSyn
+    Options.AutoDetectEnabled = False
+    Options.AutoDetectLineLimit = 0
+    Options.Visible = False
+    CommentAttri.Foreground = clNavy
+    StringAttri.Foreground = clRed
+    CharAttri.Foreground = clRed
+    Left = 260
+    Top = 133
   end
   object XOpenDialog1: TOpenDialog
     Left = 340
-    Top = 173
+    Top = 125
   end
 end

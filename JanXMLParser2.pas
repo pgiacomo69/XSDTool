@@ -278,7 +278,7 @@ type
     constructor create;
     destructor destroy; override;
     {A descendant of TjanXMLNode2 with some added properties and methods for persisting XML}
-    procedure LoadXML(filename: string);
+    function LoadXML(filename: string):String;
     {Loads an XML document from filename and parses the document into a DOM.}
     procedure SaveXML(filename: string);
     {Saves the DOM to filename.}
@@ -1515,10 +1515,15 @@ begin
   end;
 end;
 
-procedure TjanXMLParser2.LoadXML(filename: string);
+function TjanXMLParser2.LoadXML(filename: string):String;
 begin
   Fxml := loadstring(filename);
+  result:=fxml;
+  try
   FParseError := parse;
+  except
+   on e:exception do begin end;
+  end;
 end;
 
 procedure TjanXMLParser2.OutputNode(node: TjanXMLNode2);
@@ -1694,7 +1699,9 @@ var
 begin
   currentNode := parentNode;
   repeat
+    tagname:='';
     GetTag;
+
     if copy(tag, 1, 1) = '/' then
     begin
       // closing tag
@@ -1725,34 +1732,36 @@ begin
         tagname := tag;
         strAttributes := '';
       end;
+      if tagname<>'!DOCTYPE' then
+       begin
+        if currentnode = nil then
+        begin // xml root node
+          newnode := FparseRoot;
+        end
+        else if currentnode = rootNode then
+        begin // fragment root node
+          newnode := FparseRoot;
+        end
+        else
+        begin
+          newnode := TjanXMLNode2.create;
+          newnode.FParser := self;
+          if currentnode <> nil then
+            currentnode.FNodes.Add(newnode);
+          newnode.FParentNode := currentnode;
+        end;
+        newnode.name := tagname;
+        if strAttributes <> '' then
+          parseAttributes(newnode, strAttributes);
 
-      if currentnode = nil then
-      begin // xml root node
-        newnode := FparseRoot;
-      end
-      else if currentnode = rootNode then
-      begin // fragment root node
-        newnode := FparseRoot;
-      end
-      else
-      begin
-        newnode := TjanXMLNode2.create;
-        newnode.FParser := self;
-        if currentnode <> nil then
-          currentnode.FNodes.Add(newnode);
-        newnode.FParentNode := currentnode;
-      end;
-      newnode.name := tagname;
-      if strAttributes <> '' then
-        parseAttributes(newnode, strAttributes);
-
-      if NOT bShortCut then
-      begin
-        parseText(newnode);
-        currentnode := newnode;
-      end;
+        if NOT bShortCut then
+        begin
+          parseText(newnode);
+          currentnode := newnode;
+        end;
+       end;
     end;
-  until (currentNode = nil) or (currentnode = rootnode);
+  until ((currentNode = nil) or (currentnode = rootnode)) and (tagname<>'!DOCTYPE') ;
 end;
 
 procedure TjanXMLParser2.parseText(node: TjanXMLNode2);
@@ -4033,4 +4042,3 @@ begin
 end;
 
 end.
-

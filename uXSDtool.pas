@@ -22,9 +22,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ExtCtrls, ComCtrls, StdCtrls, xpDialogs,
-  JanXMLParser2, ImgList, ActnList, ToolWin, MRUFList, System.ImageList, System.Actions;
-//  , SynEditHighlighter,
-//  SynHighlighterXML, SynEdit, SynMemo, SynHighlighterPas;
+  JanXMLParser2, ImgList, ActnList, ToolWin, MRUFList, SynEditHighlighter,
+  SynHighlighterXML, SynEdit, SynMemo, SynHighlighterPas, SynEditCodeFolding,
+  System.ImageList, System.Actions;
 
 type
   TForm1 = class(TForm)
@@ -75,11 +75,12 @@ type
     FindDialog1: TFindDialog;
     acFind: TAction;
     ToolButton12: TToolButton;
-//    SynXMLSyn1: TSynXMLSyn;
-    mmXML: TMemo;
-    mmCode: TMemo;
+    mmXML: TSynMemo;
+    SynXMLSyn1: TSynXMLSyn;
+    mmCode: TSynMemo;
+    SynPasSyn1: TSynPasSyn;
     XOpenDialog1: TOpenDialog;
-//    SynPasSyn1: TSynPasSyn;
+    About1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure debug1Click(Sender: TObject);
@@ -97,6 +98,7 @@ type
     procedure acWordwrapExecute(Sender: TObject);
     procedure acFindExecute(Sender: TObject);
     procedure mmXMLChange(Sender: TObject);
+    procedure About1Click(Sender: TObject);
   private
     { Private-Deklarationen }
     dom: tJanXMLParser2;
@@ -265,7 +267,7 @@ var
   i: integer;
 begin
   mmCode.Lines.Clear;
-  if (dom.name = xsschema1)then
+  if (Namepart(dom.name) = xsdSchema)then
     parseSchema(dom)
   else if Namepart(dom.name) = 'definitions' then
     parseWSDL(dom)
@@ -302,12 +304,13 @@ begin
   mmCode.Lines.Clear;
   bChanged := false;
   mmXML.Text := LoadString(fn_xsd);
-
+  mmXMLChange(self);
   tree.items.EndUpdate;
   tree.FullExpand;
 
   PageControl1.ActivePage := tsXML;
   SetActiveActions;
+  // MRU.InsertItem(0, fn_xsd);
 end;
 
 procedure TForm1.acExitExecute(Sender: TObject);
@@ -318,6 +321,11 @@ end;
 procedure TForm1.acExpandExecute(Sender: TObject);
 begin
   tree.FullExpand;
+end;
+
+procedure TForm1.About1Click(Sender: TObject);
+begin
+ messagedlg('By Giacomo (pgiacomo69@gmail.com)' +chr(13)+'Based on a 2005 work  by Thomas Kerkmann (thkerkmann@t-online.de)',mtinformation,[mbok],0);
 end;
 
 procedure TForm1.acCollapseExecute(Sender: TObject);
@@ -594,4 +602,3 @@ begin
 end;
 
 end.
-

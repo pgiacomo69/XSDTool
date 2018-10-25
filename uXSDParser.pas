@@ -17,6 +17,7 @@ type
   private
     FOnLogout: tLogProcedure;
     FClassDefs: tClassDefs;
+    FxsdSchemaPrefix:String;
     function TranslateType(const sType: string): string;
     procedure parseRestriction(xRest: tJanXMLNode2; const sPref: string);
     procedure parseProperties(xElement, dn: tJanXMLNode2);
@@ -44,6 +45,7 @@ type
 implementation
 uses
   SysUtils,
+  UXmlTools,
   mylib;
 
 procedure tXSDParser.Logout(const s: string);
@@ -127,12 +129,12 @@ var
   sVal: string;
 begin
   Logout('parseRestriction');
-  xEnum := xRest.getChildByName(xsEnumeration1);
+  xEnum := xRest.getChildByName(NSName(FxsdSchemaPrefix,xsdEnumeration));
   if Assigned(xEnum) then
     Logout('xEnum: ')
   else
     Logout('xEnum=NIL');
-  while Assigned(xEnum) and (xEnum.name = xsEnumeration1) do
+  while Assigned(xEnum) and (xEnum.name = NSName(FxsdSchemaPrefix,xsdEnumeration)) do
   begin
     sVal := xEnum.attribute['value'];
     Logout(':' + sVal);
@@ -176,7 +178,7 @@ begin
     sElement := xSimple.attribute[xsename]
   else
     sElement := '';
-  xRest := xSimple.getChildByName(xsrestriction1);
+  xRest := xSimple.getChildByName(NSName(FxsdSchemaPrefix,xsdrestriction));
   if assigned(xRest) then
   begin
     pt := xRest.attribute[xsRsBase];
@@ -217,7 +219,7 @@ begin // procedure parseProperties(dn: tJanXMLNode2);
   else
     iMax := StrToIntDef(sNs, cScalar);
 
-  xn := dn.getChildByName(xsrestriction1);
+  xn := dn.getChildByName(NSName(FxsdSchemaPrefix,xsdrestriction));
   if assigned(xn) then
   begin
     sType := xn.attribute[xsRsBase];
@@ -241,9 +243,9 @@ begin
   for i := 0 to c - 1 do
   begin
     dn2 := tJanXMLNode2(dn.Nodes[i]);
-    if dn2.name = xsElement1 then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdElement) then
       parseElement(dn2, true)
-    else if dn2.name = xscomplexType1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
       parseComplextype(dn, dn2, bInClass)
     else
       Logout('// --- parseSequence.node: ' + dn2.attribute[xsename]);
@@ -262,9 +264,9 @@ begin
   for i := 0 to c - 1 do
   begin
     dn2 := tJanXMLNode2(dn.Nodes[i]);
-    if dn2.name = xsElement1 then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdElement) then
       parseElement(dn2, true)
-    else if dn2.name = xscomplexType1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
       parseComplextype(dn, dn2, bInClass)
     else
       Logout('// --- parseChoice.node: ' + dn2.attribute[xsename]);
@@ -286,9 +288,9 @@ begin
   for i := 0 to dn.nodes.count - 1 do
   begin
     dn2 := tJanXMLNode2(dn.Nodes[i]);
-    if dn2.name = xsExtension1 then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdExtension) then
       parseExtension(dn2)
-//    else if dn2.name = xsRestriction1 then
+//    else if dn2.name = xsrestriction then
 //      parseRestriction(dn2)
     else
       Logout('// --- parseSequence.node: ' + dn2.attribute[xsename]);
@@ -307,7 +309,7 @@ var
   dn2: tJanXMLNode2;
 begin
   Logout('// parse SimpleContent');
-  xExt := dn.getChildByName(xsextension1);
+  xExt := dn.getChildByName(NSName(FxsdSchemaPrefix,xsdExtension));
   if assigned(xExt) then
   begin
     pt := xExt.attribute[xsRsBase];
@@ -319,9 +321,9 @@ begin
     for c := 0 to xExt.nodes.Count - 1 do
     begin
       dn2 := tJanXMLNode2(xExt.Nodes[c]);
-      if dn2.name = xsattribute1 then
+      if dn2.name = NSName(FxsdSchemaPrefix,xsdattribute) then
         parseattribute(dn2)
-      else if dn2.name = xsExtension1 then
+      else if dn2.name = NSName(FxsdSchemaPrefix,xsdExtension) then
         parseExtension(dn2);
 
 
@@ -378,15 +380,15 @@ begin
   for i := 0 to c - 1 do
   begin
     dn2 := tJanXMLNode2(xComplex.Nodes[i]);
-    if dn2.name = xssequence1 then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdsequence) then
       parseSequence(dn2, bInClass)
-    else if dn2.name = xschoice1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdchoice) then
       parseChoice(dn2, bInClass)
-    else if dn2.name = xssimpleContent1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdsimpleContent) then
       parseSimplecontent(dn2, bInClass)
-    else if dn2.name = xsattribute1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdattribute) then
       parseattribute(dn2)
-    else if dn2.name = xscomplexContent then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexContent) then
       parsecomplexcontent(dn2)
     else
       ;
@@ -421,7 +423,7 @@ begin
     iMin := 0; // default optional
   if sType = '' then
   begin
-    xn := xAttribute.getChildByName(xsrestriction1, true);
+    xn := xAttribute.getChildByName(NSName(FxsdSchemaPrefix,xsdrestriction), true);
     if assigned(xn) then
     begin
       sType := xn.attribute[xsRsBase];
@@ -479,12 +481,12 @@ begin // procedure parseElement(dn: tJanXMLNode2);
   Logout(Format('// parseElement: %s(%s)%s [%d,%d]',
     [sElement, sType, sRef, iMin, iMax]));
 
-  dn2 := xElement.getChildByName(xsSimpleType1);
+  dn2 := xElement.getChildByName(NSName(FxsdSchemaPrefix,xsdSimpleType));
   if assigned(dn2) then
     parseSimpleType(xElement, dn2, bInClass)
   else
   begin
-    dn2 := xElement.getChildByName(xsComplexType1);
+    dn2 := xElement.getChildByName(NSName(FxsdSchemaPrefix,xsdcomplexType));
     if assigned(dn2) then
       parseComplextype(xElement, dn2, bInClass)
     else
@@ -513,14 +515,14 @@ begin // procedure parseElement(dn: tJanXMLNode2);
             for i := 0 to c - 1 do
             begin
               dn2 := tJanXMLNode2(xElement.Nodes[i]);
-              if dn2.name = xscomplexType1 then
+              if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
                 parseComplextype(xElement, dn2, bInClass)
-              else if dn2.name = xssequence1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdsequence) then
                 parseSequence(dn2, bInClass)
-              else if dn2.name = xschoice1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdchoice) then
                 parseChoice(dn2, bInClass)
-              else if dn2.name = xssimpleType1 then
-              else if dn2.name = xsattribute1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdSimpleType) then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdattribute) then
                 parseAttribute(dn2)
                   ;
               //parseProperties(sElement, dn2);
@@ -534,6 +536,7 @@ begin // procedure parseElement(dn: tJanXMLNode2);
           if sType <> '' then
           begin
             sType := TranslateType(sType);
+
             p := tProperty.Create(sElement, sType, 'E', '', iMax, iMin, true);
             FCurrentClass.Properties.AddObject(p.name, p);
           end
@@ -544,15 +547,15 @@ begin // procedure parseElement(dn: tJanXMLNode2);
             for i := 0 to c - 1 do
             begin
               dn2 := tJanXMLNode2(xElement.Nodes[i]);
-              if dn2.name = xscomplexType1 then
+              if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
                 parseComplextype(xElement, dn2, bInClass)
-              else if dn2.name = xssequence1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdsequence) then
                 parseSequence(dn2, bInClass)
-              else if dn2.name = xschoice1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdchoice) then
                 parseChoice(dn2, bInClass)
-              else if dn2.name = xssimpleType1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdSimpleType) then
                 parseSimpleType(xElement, dn2, bInClass)
-              else if dn2.name = xsattribute1 then
+              else if dn2.name = NSName(FxsdSchemaPrefix,xsdattribute) then
                 parseAttribute(dn2)
                   ;
               //parseProperties(sElement, dn2);
@@ -592,6 +595,52 @@ begin
 end;
 
 procedure tXSDParser.parseSchema(xSchema: tJanXMLNode2);
+
+procedure SetCOmplexProperties;
+var i,j:integer;
+    c:tClassDef;
+    p:tProperty;
+    n:integer;
+    t:String;
+begin
+for i:=0 to  ClassDefs.Count-1 do
+    begin
+
+     if assigned(classdefs.objects[i]) then
+
+      begin
+
+        if classdefs.objects[i] is tclassdef then
+         begin
+          c:=tclassdef(classdefs.objects[i]);
+          for j:=0 to c.properties.Count-1 do
+          begin
+            if c.Properties.Objects[j]<>nil then
+             begin
+              if c.Properties.Objects[j] is tproperty then
+               begin
+                p:=tproperty(c.Properties.Objects[j]);
+                t:=p._Type;
+                if t<>'' then
+                 begin
+                  if t[1]='t' then
+                    begin
+                     delete(t,1,1);
+                     n:=0;
+                     if ClassDefs.indexof(t)>=0 then
+                      p.SetIsComplex;
+                    end;
+                 end;
+               end;
+             end;
+
+          end;
+         end;
+      end;
+    end;
+
+end;
+
 var
   c: integer;
   i: integer;
@@ -599,6 +648,7 @@ var
   tns: string;
   sa: string;
   temp: string;
+  attr:String;
 begin // procedure parseSchema(dn:tJanXMLNode2)
   FClassDefs.Clear;
   FCurrentClass := nil;
@@ -608,7 +658,7 @@ begin // procedure parseSchema(dn:tJanXMLNode2)
 
   temp := xSchema.attribute['attributeFormDefault'];
   FClassDefs.attributesqualified := temp = cqualified;
-
+  FxsdSchemaPrefix:='';
   tns := xSchema.attribute['targetNamespace'];
   if tns <> '' then
   begin
@@ -617,15 +667,18 @@ begin // procedure parseSchema(dn:tJanXMLNode2)
     for i := 0 to xSchema.attributecount - 1 do
     begin
       sa := xSchema.attributename[i];
+      attr:=xSchema.attribute[i];
       if pos('xmlns:', sa) = 1 then
       begin
         temp := copy(sa, 7, length(sa));
-        if tns = xSchema.attribute[i] then
+        if attr=xsdSchemaURI then
+         FxsdSchemaPrefix:=temp;
+        if tns = attr then
           FClassDefs.NamespacePrefix := temp
         else
         begin
-          FClassDefs.AddInclude(temp, xSchema.attribute[i]);
-          Logout('AddInclude ' + temp + ',' + xSchema.attribute[i]);
+          FClassDefs.AddInclude(temp, attr);
+          Logout('AddInclude ' + temp + ',' + attr);
         end;
       end;
     end;
@@ -637,16 +690,17 @@ begin // procedure parseSchema(dn:tJanXMLNode2)
     dn2 := TjanXMLNode2(xSchema.Nodes[i]);
     Logout('// xs:schema ' + dn2.name + ' ' + dn2.text);
 { TODO : Add AttributeGroup handling }
-    if dn2.name = xselement1 then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdElement) then
       parseElement(dn2, false)
-    else if dn2.name = xsComplexType1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
       parseComplextype(nil, dn2)
-    else if dn2.name = xsimport1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdimport) then
       parseImport(dn2)
-    else if dn2.name = xsSimpletype1 then
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdSimpleType) then
       parseSimpleType(nil, dn2, false)
         ;
   end;
+  SetComplexProperties;
 end; // procedure parseSchema(dn:tJanXMLNode2)
 
 constructor tXSDParser.Create(const aFilename: string);
@@ -671,4 +725,3 @@ begin
 end;
 
 end.
-

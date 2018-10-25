@@ -25,6 +25,7 @@ type
   public
     constructor Create(const aName, aType, aBase, aNSpc: string;
       aMax, aMin: integer; bSimple: boolean);
+    procedure setIsComplex;
     property Name: string read FName;
     property _Type: string read FType;
     property Base: string read FBase;
@@ -95,40 +96,43 @@ type
 
 {(*}
 const
-//  xsSchema         = 'xs:schema';
-  xsSchema1        = 'schema';
-//  xsElement        = 'xs:element';
-  xsElement1       = 'element';
-//  xsImport         = 'xs:import';
-  xsImport1        = 'import';
+  xsdSchemaURI     = 'http://www.w3.org/2001/XMLSchema';
+  xsdSchema        = 'schema';
+  xsdElement        = 'element';
+  xsdImport         = 'import';
+  xsdAttribute      = 'attribute';
+  xsdSequence       = 'sequence';
+  xsdComplexType    = 'complexType';
+  xsdSimpleType     = 'simpleType';
+  xsdSimpleContent  = 'simpleContent';
+  xsdComplexContent = 'complexContent';
+  xsdExtension      = 'extension';
+  xsdRestriction    = 'restriction';
+  xsdEnumeration    = 'enumeration';
+  xsdchoice         = 'choice';
+  xsdeuse           = 'use';
+ (* xsSchema         = 'schema';
+  xsElement        = 'element';
+  xsImport         = 'import';
+  xsAttribute      = 'attribute';
+  xsSequence       = 'sequence';
+  xsComplexType    = 'complexType';
+  xsSimpleType     = 'simpleType';
+  xsSimpleContent  = 'simpleContent';
+  xsComplexContent  = 'complexContent';
+  xsExtension      = 'extension';
+  xsRestriction    = 'restriction';
+  xsEnumeration    = 'enumeration';
+  xschoice         = 'choice';
+  xseuse           = 'use'; *)
   xseName          = 'name';
   xseType          = 'type';
   xseRef           = 'ref';
-//  xsAttribute      = 'xs:attribute';
-  xsAttribute1     = 'attribute';
-//  xsSequence       = 'xs:sequence';
-  xsSequence1      = 'sequence';
-//  xsComplexType    = 'xs:complexType';
-  xsComplexType1   = 'complexType';
-//  xsSimpleType     = 'xs:simpleType';
-  xsSimpleType1    = 'simpleType';
-//  xsSimpleContent  = 'xs:simpleContent';
-  xsSimpleContent1 = 'simpleContent';
-//  xsExtension      = 'xs:extension';
-  xsExtension1     = 'extension';
-//  xsRestriction    = 'xs:restriction';
-  xsRestriction1   = 'restriction';
-//  xsEnumeration    = 'xs:enumeration';
-  xsEnumeration1   = 'enumeration';
   xsRsBase         = 'base';
   xsminoccurs      = 'minOccurs';
   xsmaxoccurs      = 'maxOccurs';
   xsmunbounded     = 'unbounded';
-//  xschoice         = 'xs:choice';
-  xschoice1        = 'choice';
   xsuse            = 'use';
-//  xseuse           = 'xs:use';
-  xscomplexcontent  = 'complexContent';
 
 const // xml datatypes
   tpString       = 'xs:string';
@@ -294,6 +298,11 @@ end;
 function tProperty.GetIsOptional: boolean;
 begin
   result := minOccurs = 0;
+end;
+
+procedure tProperty.setIsComplex;
+begin
+ Fsimple:=false;
 end;
 
 { tClassDefs }
@@ -599,7 +608,7 @@ begin
               outline('//  ' + aProp._Type + ' = ' + s + ' / simple = ' + IntToStr(
                 ord(aProp.Simple)));
             aProp.FType := s;
-            aProp.FSimple := true;
+            // gp aProp.FSimple := true;
           end;
           outline(tabF + aProp.Name + ': ' + aProp._Type + '; // '
             + '(' + aProp.Base + ')');
@@ -707,7 +716,7 @@ begin
       begin
         aProp := tProperty(aClass.Properties.Objects[p]);
         if aProp.IsList and not aProp.simple then
-          outline('  a' + aProp.name + ': t' + aProp.name + ';');
+          outline('  a' + aProp.name + ': ' + aProp._type + ';');
       end;
       outline('begin');
       if bCallSimpleConstructor then
@@ -799,7 +808,7 @@ begin
             else
             begin
               outline('if (sn = sn' + aClass.Name + '_' + aProp.name + ')');
-              outline('      and ((thisURI='''') or (t' + aProp.name + '._nsURI_'
+              outline('      and ((thisURI='''') or (' + aProp._type + '._nsURI_'
                 + ' = thisURI)) then');
             end;
             if aProp.IsList then
@@ -812,7 +821,7 @@ begin
               end
               else
               begin
-                outline('      a' + aProp.Name + ' := t' + aProp.name +
+                outline('      a' + aProp.Name + ' := ' + aProp._type +
                   '.Create(xn);');
                 outline('      F' + aProp.Name + '.AddObject(''?'', a' +
                   aProp.Name + ');');
@@ -850,7 +859,7 @@ begin
                   aProp._Type)
             end // if aProp.simple then
             else
-              outline('      F' + aProp.Name + ' := t' + aProp.name +
+              outline('      F' + aProp.Name + ' := ' + aProp._type +
                 '.Create(xn)');
 
             bInIf := true;
@@ -1013,7 +1022,7 @@ begin
                 outline('      xn.text := F' + aProp.Name + '.Strings[i];')
               else
               begin
-                outline('      t' + aProp.Name + '(F' + aProp.Name +
+                outline('      ' + aProp._type + '(F' + aProp.Name +
                   '.Objects[i]).Save(xn);');
               end;
               outline('    end; // for i:=0 to ...');
@@ -1063,8 +1072,13 @@ begin
                   outline('  xn.text := ' + 'IntToStr(F' + aProp.Name + ');')
                 else if aProp._Type = dString then
                   outline('  xn.text := ' + 'F' + aProp.Name + ';')
+                else if aProp._Type = 'uxs.tnormalizedString' then
+                  outline('  xn.text := ' + 'F' + aProp.Name + ';')
+                else if aProp._Type = 'uxs.tbase64Binary' then
+                  outline('  xn.text := ' + 'F' + aProp.Name + ';')
                 else
-                  outline('  xn.text := ' + 'F' + aProp.Name + ';');
+                 outline('  xn.text := ' + 'F' + aProp.Name + ';');
+
 
                 if aProp.IsOptional then
                   outline('  end;');
@@ -1096,4 +1110,3 @@ begin
 end;
 
 end.
-

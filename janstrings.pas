@@ -624,15 +624,16 @@ end;
 
 function LoadString(aFile: string): string;
 var
-  s: TStringStream;
+  s: TStringList;
 begin
   if FileExists(aFile) then
-    with TStringStream.Create do
+   s:=TStringList.Create;
+
     try
-      LoadFromFile(aFile);
-      Result := DataString;
+      s.LoadFromFile(afile);
+      Result := s.Text;
     finally
-      free;
+      s.free;
     end;
 end;
 
@@ -5986,4 +5987,3 @@ initialization
   InitTables;
 
 end.
-

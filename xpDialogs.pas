@@ -146,4 +146,3 @@ finalization
   if CommHandle <> 0 then
     FreeLibrary(CommHandle);
 end.
-

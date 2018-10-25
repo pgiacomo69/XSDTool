@@ -768,7 +768,4 @@ begin
   Fvalue := Value;
 end;
 
-
-
-
 end.

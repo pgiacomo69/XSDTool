@@ -36,21 +36,20 @@ uses
 
 type
   { Registry root values }
-  TRootKey = (rkClassesRoot, rkCurrentUser, rkLocalMachine, rkUsers,
-     rkCurrentConfig, rkDynData);
+  TRootKey = (rkClassesRoot, rkCurrentUser, rkLocalMachine, rkUsers, rkCurrentConfig, rkDynData);
 
 const
   { Defaults for component properties }
-  DEF_MAXIMUM         = 5;
-  DEF_REMOVEONCLICK   = TRUE;
-  DEF_USESUBMENU      = FALSE;
-  DEF_SUBMENUNAME     = 'Reopen';
+  DEF_MAXIMUM = 5;
+  DEF_REMOVEONCLICK = TRUE;
+  DEF_USESUBMENU = FALSE;
+  DEF_SUBMENUNAME = 'Reopen';
   DEF_MAXCAPTIONWIDTH = 200;
   {$IFDEF DFS_WIN32}
-  DEF_USEREGISTRY     = TRUE;
-  DEF_ROOTKEY         = rkCurrentUser;
+  DEF_USEREGISTRY = TRUE;
+  DEF_ROOTKEY = rkCurrentUser;
   {$ELSE}
-  DEF_USEREGISTRY     = FALSE;
+  DEF_USEREGISTRY = FALSE;
   {$ENDIF}
 
 type
@@ -65,7 +64,7 @@ type
   end;
 
   { Event procedure for MRU item click.  Passes filename for easy us }
-  TMRUClick = procedure(Sender: TObject; AFilename: string) of Object;
+  TMRUClick = procedure(Sender: TObject; AFilename: string) of object;
 
   TMRUFileList = class(TComponent)
   private
@@ -73,7 +72,7 @@ type
     FMaximum: byte;
     FRemoveOnClick: boolean;
     FUseSubmenu: boolean;
-    FInsertSeparator : Boolean;
+    FInsertSeparator: Boolean;
     FSubmenuName: string;
     FFileMenu: TMenuItem;
     FMenuItems: TStringList;
@@ -124,64 +123,40 @@ type
     { list.  You probably want ClearAllItems. }
     procedure RemoveAllItems;
     { Method to clear a single item by name from the MRU items. }
-    procedure ClearItem (aFile: string);
+    procedure ClearItem(aFile: string);
     { Method to clear all current MRU items. }
     procedure ClearAllItems;
 
     { The MRU Items.  Read Only. }
-    property Items: TStringList
-       read FMenuItems;
+    property Items: TStringList read FMenuItems;
   published
-    property Maximum: byte             { Maximum number of items on MRU list }
-        read FMaximum
-        write SetMaximum
-        default DEF_MAXIMUM;
-    property RemoveOnClick: boolean    { Remove MRU item when selected? }
-        read FRemoveOnClick
-        write FRemoveOnClick
-        default DEF_REMOVEONCLICK;
-    property UseSubmenu: boolean       { MRU items placed on a submenu? }
-        read FUseSubmenu
-        write SetUseSubmenu
-        default DEF_USESUBMENU;
-    property InsertSeparator : boolean
-        read FInsertSeparator
-        write SetInsertSeparator
-        default True;
+    property Maximum:byte             { Maximum number of items on MRU list }
+read FMaximum write SetMaximum default DEF_MAXIMUM;
+    property RemoveOnClick:boolean    { Remove MRU item when selected? }
+read FRemoveOnClick write FRemoveOnClick default DEF_REMOVEONCLICK;
+    property UseSubmenu:boolean       { MRU items placed on a submenu? }
+read FUseSubmenu write SetUseSubmenu default DEF_USESUBMENU;
+    property InsertSeparator: boolean read FInsertSeparator write SetInsertSeparator default True;
     property SubmenuName: string       { Caption of submenu item, if needed }
-        read FSubmenuName
-        write SetSubmenuName;
-    property OnMRUItemClick: TMRUClick { Event for MRU item selection }
-        read FOnMRUClick
-        write FOnMRUClick;
-    property FileMenu: TMenuItem       { Menu to place MRU items on. }
-        read FFileMenu
-        write SetFileMenu;
-    property AutoSave: boolean         { Save and restore MRU items automatically. }
-        read FAutoSave
-        write FAutoSave
-        default TRUE;
+read FSubmenuName write SetSubmenuName;
+    property OnMRUItemClick:TMRUClick { Event for MRU item selection }
+read FOnMRUClick write FOnMRUClick;
+    property FileMenu:TMenuItem       { Menu to place MRU items on. }
+read FFileMenu write SetFileMenu;
+    property AutoSave:boolean         { Save and restore MRU items automatically. }
+read FAutoSave write FAutoSave default TRUE;
     property AutoSaveName: string      { The filename (INI) or key (registry) to save to.}
-        read FAutoSaveName
-        write FAutoSaveName;
+read FAutoSaveName write FAutoSaveName;
     property AutoSaveKey: string       { The section to save to. }
-        read FAutoSaveKey
-        write FAutoSavekey;
+read FAutoSaveKey write FAutoSavekey;
     {$IFDEF DFS_WIN32}
-    property AutoSaveRootKey: TRootKey { Root registry key for AutoSaveName registry path }
-       read GetAutoSaveRootKey
-       write SetAutoSaveRootKey
-       default DEF_ROOTKEY;
+    property AutoSaveRootKey:TRootKey { Root registry key for AutoSaveName registry path }
+read GetAutoSaveRootKey write SetAutoSaveRootKey default DEF_ROOTKEY;
     {$ENDIF}
-    property MaxCaptionWidth: integer  { Maximum width of an MRU item, 0 = no maximum.}
-        read FMaxCaptionWidth
-        write SetMaxCaptionWidth
-        default DEF_MAXCAPTIONWIDTH;
+    property MaxCaptionWidth:integer  { Maximum width of an MRU item, 0 = no maximum.}
+read FMaxCaptionWidth write SetMaxCaptionWidth default DEF_MAXCAPTIONWIDTH;
     {$IFDEF DFS_WIN32}
-    property UseRegistry: boolean
-        read FUseRegistry
-        write FUseRegistry
-        default DEF_USEREGISTRY;
+    property UseRegistry: boolean read FUseRegistry write FUseRegistry default DEF_USEREGISTRY;
     {$ENDIF}
   end;
 
@@ -189,7 +164,8 @@ procedure Register;
 
 implementation
 
-uses WinTypes, WinProcs, Graphics, FileCtrl, INIFiles;
+uses
+  WinTypes, WinProcs, Graphics, FileCtrl, INIFiles;
 
 var
   MenuBmp: TBitmap;
@@ -217,7 +193,7 @@ begin
   FMaximum := DEF_MAXIMUM;
   FRemoveOnClick := DEF_REMOVEONCLICK;
   FUseSubmenu := DEF_USESUBMENU;
-  FInsertSeparator:=True;
+  FInsertSeparator := True;
   SubmenuName := DEF_SUBMENUNAME;
   FMaxCaptionWidth := DEF_MAXCAPTIONWIDTH;
   FMenuItems := TStringList.Create;
@@ -252,10 +228,12 @@ end;
 
 procedure TMRUFileList.SetMaximum(Val: byte);
 begin
-  if FMaximum = Val then exit;    { Value not different, do nothing. }
-  if Val < FMaximum then begin    { If new less than old value, remove some. }
+  if FMaximum = Val then
+    exit;    { Value not different, do nothing. }
+  if Val < FMaximum then
+  begin    { If new less than old value, remove some. }
     while FMenuItems.Count > Val do { Remove extra items }
-      FMenuItems.Delete(FMenuItems.Count-1);
+      FMenuItems.Delete(FMenuItems.Count - 1);
     PopulateMenu;                 { Redo the MRU menu. }
   end;
   { Note: an ELSE clause is not needed since if new value is more than old,  }
@@ -272,21 +250,24 @@ end;
 
 procedure TMRUFileList.SetUseSubmenu(Val: boolean);
 begin
-  if FUseSubmenu = Val then exit; { Value not different, do nothing . }
+  if FUseSubmenu = Val then
+    exit; { Value not different, do nothing . }
   FUseSubmenu := Val;
   PopulateMenu;                   { Redo the menu according to new value. }
 end;
 
 procedure TMRUFileList.SetInsertSeparator(Val: boolean);
 begin
- If Val=FInsertSeparator then exit;
- FInsertSeparator:=Val;
- PopulateMenu;
+  if Val = FInsertSeparator then
+    exit;
+  FInsertSeparator := Val;
+  PopulateMenu;
 end;
 
 procedure TMRUFileList.SetSubmenuName(Val: string);
 begin
-  if FSubmenuName = Val then exit; { Value not different, do nothing . }
+  if FSubmenuName = Val then
+    exit; { Value not different, do nothing . }
   FSubmenuName := Val;
   if FUseSubmenu then         { Don't bother if we're not using the submenu. }
     PopulateMenu;             { Redo the menu according to new value. }
@@ -294,7 +275,8 @@ end;
 
 procedure TMRUFileList.SetMaxCaptionWidth(Val: integer);
 begin
-  if Val = FMaxCaptionWidth then exit; { Value not different, do nothing. }
+  if Val = FMaxCaptionWidth then
+    exit; { Value not different, do nothing. }
   FMaxCaptionWidth := Val;
   PopulateMenu;
 end;
@@ -302,8 +284,7 @@ end;
 {$IFDEF DFS_WIN32}
 procedure TMRUFileList.SetAutoSaveRootKey(Val: TRootKey);
 const
-  ORD_TO_VAL : array[TRootKey] of HKEY = (HKEY_CLASSES_ROOT, HKEY_CURRENT_USER,
-     HKEY_LOCAL_MACHINE, HKEY_USERS, HKEY_CURRENT_CONFIG, HKEY_DYN_DATA);
+  ORD_TO_VAL: array[TRootKey] of HKEY = (HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS, HKEY_CURRENT_CONFIG, HKEY_DYN_DATA);
 begin
   FRegistryKey := ORD_TO_VAL[Val];
 end;
@@ -311,11 +292,16 @@ end;
 function TMRUFileList.GetAutoSaveRootKey: TRootKey;
 begin
   case FRegistryKey of
-    HKEY_CLASSES_ROOT:   Result := rkClassesRoot;
-    HKEY_LOCAL_MACHINE:  Result := rkLocalMachine;
-    HKEY_USERS:          Result := rkUsers;
-    HKEY_CURRENT_CONFIG: Result := rkCurrentConfig;
-    HKEY_DYN_DATA:       Result := rkDynData;
+    HKEY_CLASSES_ROOT:
+      Result := rkClassesRoot;
+    HKEY_LOCAL_MACHINE:
+      Result := rkLocalMachine;
+    HKEY_USERS:
+      Result := rkUsers;
+    HKEY_CURRENT_CONFIG:
+      Result := rkCurrentConfig;
+    HKEY_DYN_DATA:
+      Result := rkDynData;
   else
     Result := rkCurrentUser;
   end;
@@ -326,11 +312,13 @@ procedure TMRUFileList.MRUClicked(Sender: TObject);
 var
   ClickItem: string;
 begin
-  with Sender as TMRUMenuItem do begin
+  with Sender as TMRUMenuItem do
+  begin
     if assigned(FOnMRUClick) then       { Save the clicked item's filename }
-      ClickItem := FMenuItems[ItemNumber-1];
-    if FRemoveOnClick then begin        { Remove the item, if desired. }
-      FMenuItems.Delete(ItemNumber-1);
+      ClickItem := FMenuItems[ItemNumber - 1];
+    if FRemoveOnClick then
+    begin        { Remove the item, if desired. }
+      FMenuItems.Delete(ItemNumber - 1);
       PopulateMenu;
     end;
     if assigned(FOnMRUClick) then       { Call the users event handler. }
@@ -345,10 +333,11 @@ begin
   i := FMenuItems.IndexOf(aFile);        { Search list for item being added. }
   if i > -1 then                         { Find it? }
     FMenuItems.Move(i, Index)            { Yes, move it to the top. }
-  else begin
+  else
+  begin
     FMenuItems.Insert(Index, aFile);     { No, add it. }
     while FMenuItems.Count > FMaximum do { Remove extra items. }
-      FMenuItems.Delete(FMenuItems.Count-1);
+      FMenuItems.Delete(FMenuItems.Count - 1);
   end;
   if not FInhibitUpdate then             { Should we update the menu now? }
     PopulateMenu;                        { Yes, redo the menu. }
@@ -361,7 +350,8 @@ begin
   i := FMenuItems.IndexOf(OldItem);      { Search list for item being added. }
   if i = -1 then                         { Find it? }
     exit                                 { No, get out. }
-  else begin
+  else
+  begin
     FMenuItems.Delete(i);                { Yes, remove it }
     FMenuItems.Insert(i, NewItem);       { and replace with the new one. }
   end;
@@ -376,7 +366,8 @@ begin
   i := FMenuItems.IndexOf(aFile);        { Search list for item being added. }
   if i > -1 then                         { Find it? }
     FMenuItems.Move(i, 0)                { Yes, move it to the top. }
-  else begin
+  else
+  begin
     FMenuItems.Add(aFile);         { No, add it to the top. }
     while FMenuItems.Count > FMaximum do { Remove extra items. }
       FMenuItems.Delete(0);
@@ -409,22 +400,25 @@ end;
 
 procedure TMRUFileList.PopulateMenu;
 var
-  Offset,
-  x: integer;
+  Offset, x: integer;
   NewItem: TMRUMenuItem;
-  ParentMenu,
-  AddMenu: TMenuItem;
+  ParentMenu, AddMenu: TMenuItem;
 begin
-  if (FFileMenu = NIL) then exit;        { No menu assigned, nothing to do. }
+  if (FFileMenu = NIL) then
+    exit;        { No menu assigned, nothing to do. }
   RemoveAllItems;                        { Remove all old items. }
-  if (FMenuItems.Count = 0) then exit;   { Don't have any items, we're done. }
+  if (FMenuItems.Count = 0) then
+    exit;   { Don't have any items, we're done. }
 
   { If FFileMenu is an item, insert before it.  If not, it's a submenu }
   { so just add to the end of it                                       }
-  if FFileMenu.Count <> 0 then begin
+  if FFileMenu.Count <> 0 then
+  begin
     Offset := FFileMenu.Count;
     ParentMenu := FFileMenu;
-  end else begin
+  end
+  else
+  begin
 {$IFDEF DFS_WIN32}
     Offset := FFileMenu.MenuIndex;
 {$ELSE}
@@ -434,32 +428,34 @@ begin
   end;
 
   { Create separator item. }
-  If FInsertSeparator then
-  Begin
-   NewItem := TMRUMenuItem.Create(ParentMenu);
-   NewItem.Caption := '-';
-   ParentMenu.Insert(Offset, NewItem);
-   inc(Offset);
-  End;
+  if FInsertSeparator then
+  begin
+    NewItem := TMRUMenuItem.Create(ParentMenu);
+    NewItem.Caption := '-';
+    ParentMenu.Insert(Offset, NewItem);
+    inc(Offset);
+  end;
 
   { Create submenu if needed }
-  if FUseSubmenu then begin
+  if FUseSubmenu then
+  begin
     AddMenu := TMRUMenuItem.Create(ParentMenu);
     AddMenu.Caption := FSubmenuName;
     ParentMenu.Insert(Offset, AddMenu);
     Offset := 0;
-  end else
+  end
+  else
     AddMenu := ParentMenu; { Don't need submenu, just set to the file menu. }
 
   { Create MRU items }
-  for x := 0 to FMenuItems.Count - 1 do begin
+  for x := 0 to FMenuItems.Count - 1 do
+  begin
     NewItem := TMRUMenuItem.Create(AddMenu);
-    NewItem.FullCaption := '&' + IntToStr(x+1) + ' ' + FMenuItems[x];  { Caption }
+    NewItem.FullCaption := '&' + IntToStr(x + 1) + ' ' + FMenuItems[x];  { Caption }
     if FMaxCaptionWidth = 0 then
       NewItem.Caption := NewItem.FullCaption
     else
-      NewItem.Caption := '&' + IntToStr(x+1) + ' ' +
-         MinimizeName(FMenuItems[x], MenuBmp.Canvas, FMaxCaptionWidth);
+      NewItem.Caption := '&' + IntToStr(x + 1) + ' ' + MinimizeName(FMenuItems[x], MenuBmp.Canvas, FMaxCaptionWidth);
     NewItem.ItemNumber := x + 1;                { Index into FMenuItems list }
     NewItem.OnClick := MRUClicked;              { Set event handler }
     AddMenu.Insert(Offset, NewItem);            { Add to the menu }
@@ -470,22 +466,25 @@ end;
 procedure TMRUFileList.RemoveAllItems;
 var
   x: integer;
-  DeleteItem,
-  ParentMenu: TMenuItem;
+  DeleteItem, ParentMenu: TMenuItem;
 begin
-  if FFileMenu = NIL then exit;                { No menu, nothing to delete. }
+  if FFileMenu = NIL then
+    exit;                { No menu, nothing to delete. }
 
   if FFileMenu.Count <> 0 then
     ParentMenu := FFileMenu
   else
     ParentMenu := FFileMenu.Parent;
 
-  if ParentMenu = NIL then exit;                { No menu, nothing to delete. }
+  if ParentMenu = NIL then
+    exit;                { No menu, nothing to delete. }
 
   { We don't know exactly which items are ours, so we have to check them all }
-  for x := ParentMenu.Count-1 downto 0 do begin
+  for x := ParentMenu.Count - 1 downto 0 do
+  begin
     { Use RTTI to determine if item is of our special descenadant type. }
-    if (ParentMenu[x] is TMRUMenuItem) then begin
+    if (ParentMenu[x] is TMRUMenuItem) then
+    begin
       DeleteItem := ParentMenu[x];
       ParentMenu.Delete(x);   { Yes, it is, delete it. }
       DeleteItem.Free;        { Don't forget the object, too! - RGL }
@@ -499,23 +498,26 @@ var
 begin
   i := FMenuItems.IndexOf(aFile);        { Search list for item being removed. }
   if i > -1 then                         { Find it? }
-    begin
+  begin
     FMenuItems.Delete(i);                { Yes, delete it. }
     PopulateMenu;                        { redo the menu. }
-    end;
+  end;
 end;
 
 function TMRUFileList.Load: boolean;
+
   procedure StripIdents(Items: TStringList);
   var
     p: byte;
     x: integer;
   begin
-    for x := 0 to Items.Count-1 do begin
-      p := Pos('=',Items[x])+1;
-      Items[x] := copy(Items[x], p, Length(Items[x])-p+1);
+    for x := 0 to Items.Count - 1 do
+    begin
+      p := Pos('=', Items[x]) + 1;
+      Items[x] := copy(Items[x], p, Length(Items[x]) - p + 1);
     end;
   end;
+
 var
   {$IFDEF DFS_WIN32}
   RegSettings: TRegIniFile;
@@ -523,7 +525,8 @@ var
   IniSettings: TIniFile;
 begin
   Result := FALSE;
-  if (FAutoSaveName = '') or (FAutoSaveKey = '') then exit;
+  if (FAutoSaveName = '') or (FAutoSaveKey = '') then
+    exit;
   {$IFDEF DFS_WIN32}
   if FUseRegistry then
   begin
@@ -535,7 +538,8 @@ begin
     finally
       RegSettings.Free;
     end;
-  end else
+  end
+  else
   {$ENDIF}
   begin
     IniSettings := TIniFile.Create(FAutoSaveName);
@@ -559,7 +563,8 @@ var
   x: integer;
 begin
   Result := FALSE;
-  if (FAutoSaveName = '') or (FAutoSaveKey = '') then exit;
+  if (FAutoSaveName = '') or (FAutoSaveKey = '') then
+    exit;
   {$IFDEF DFS_WIN32}
   if FUseRegistry then
   begin
@@ -568,20 +573,21 @@ begin
       RegSettings.RootKey := FRegistryKey;
       RegSettings.OpenKey(FAutoSaveName, TRUE);
       RegSettings.EraseSection(FAutoSaveKey);
-      for x := 0 to Items.Count-1 do
-        RegSettings.WriteString(FAutoSaveKey, 'F'+IntToStr(x), Items[x]);
+      for x := 0 to Items.Count - 1 do
+        RegSettings.WriteString(FAutoSaveKey, 'F' + IntToStr(x), Items[x]);
       Result := TRUE;
     finally
       RegSettings.Free;
     end;
-  end else
+  end
+  else
   {$ENDIF}
   begin
     IniSettings := TIniFile.Create(FAutoSaveName);
     try
       IniSettings.EraseSection(FAutoSaveKey);
-      for x := 0 to Items.Count-1 do
-        IniSettings.WriteString(FAutoSaveKey, 'F'+IntToStr(x), Items[x]);
+      for x := 0 to Items.Count - 1 do
+        IniSettings.WriteString(FAutoSaveKey, 'F' + IntToStr(x), Items[x]);
       Result := TRUE;
     finally
       IniSettings.Free;
@@ -592,8 +598,7 @@ end;
 procedure TMRUFileList.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (Operation = opRemove) and (AComponent = FFileMenu) and
-     (csDesigning in ComponentState) then
+  if (Operation = opRemove) and (AComponent = FFileMenu) and (csDesigning in ComponentState) then
     { Our placement menu item has been deleted. }
     FFileMenu := NIL;
 end;
@@ -603,7 +608,6 @@ begin
   RemoveAllItems;
   FMenuItems.Clear;
 end;
-
 
 procedure Register;
 begin
@@ -626,7 +630,7 @@ var
 {$ENDIF}
 
 initialization
-  MenuBmp:= TBitmap.Create;
+  MenuBmp := TBitmap.Create;
   {$IFDEF DFS_WIN32}
   NCM.cbSize := SizeOf(TNonClientMetrics);
   SystemParametersInfo(SPI_GETNONCLIENTMETRICS, 0, @NCM, 0);
@@ -637,6 +641,7 @@ initialization
   {$ENDIF}
 
 {$IFDEF DFS_WIN32}
+
 finalization
   MenuBmp.Free;
 {$ELSE}

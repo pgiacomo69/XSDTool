@@ -247,6 +247,8 @@ begin
       parseElement(dn2, true)
     else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
       parseComplextype(dn, dn2, bInClass)
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdchoice) then
+      parseChoice(dn2, bInClass)
     else
       Logout('// --- parseSequence.node: ' + dn2.attribute[xsename]);
   end;
@@ -264,7 +266,9 @@ begin
   for i := 0 to c - 1 do
   begin
     dn2 := tJanXMLNode2(dn.Nodes[i]);
-    if dn2.name = NSName(FxsdSchemaPrefix,xsdElement) then
+    if dn2.name = NSName(FxsdSchemaPrefix,xsdsequence) then
+      parseSequence(dn2, true)
+    else if dn2.name = NSName(FxsdSchemaPrefix,xsdElement) then
       parseElement(dn2, true)
     else if dn2.name = NSName(FxsdSchemaPrefix,xsdcomplexType) then
       parseComplextype(dn, dn2, bInClass)

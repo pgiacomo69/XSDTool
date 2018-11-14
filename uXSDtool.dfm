@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 532
   Top = 204
   Caption = 'XSD to Delphi Translator'
-  ClientHeight = 387
+  ClientHeight = 347
   ClientWidth = 674
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object Form1: TForm1
   TextHeight = 13
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 368
+    Top = 328
     Width = 674
     Height = 19
     Panels = <>
@@ -28,7 +28,7 @@ object Form1: TForm1
     Left = 0
     Top = 29
     Width = 674
-    Height = 339
+    Height = 299
     ActivePage = tsXML
     Align = alClient
     TabOrder = 1
@@ -36,11 +36,15 @@ object Form1: TForm1
     object tsXML: TTabSheet
       Caption = 'XML'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmXML: TSynMemo
         Left = 0
         Top = 0
         Width = 666
-        Height = 311
+        Height = 271
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -84,24 +88,33 @@ object Form1: TForm1
     end
     object tsTree: TTabSheet
       Caption = 'Tree'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object tree: TTreeView
         Left = 0
         Top = 0
         Width = 666
-        Height = 311
+        Height = 271
         Align = alClient
         Indent = 19
         TabOrder = 0
+        ExplicitHeight = 291
       end
     end
     object tsCode: TTabSheet
       Caption = 'Code'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmCode: TSynMemo
         Left = 0
         Top = 0
         Width = 666
-        Height = 311
+        Height = 291
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -146,11 +159,15 @@ object Form1: TForm1
     object tsLog: TTabSheet
       Caption = 'Log'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object mmLog: TMemo
         Left = 0
         Top = 0
         Width = 666
-        Height = 311
+        Height = 291
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -295,6 +312,10 @@ object Form1: TForm1
         Caption = 'prompt after save'
         OnClick = promptaftersave1Click
       end
+      object UseTXMLDocument: TMenuItem
+        Caption = 'Use TXMLDocument'
+        OnClick = UseTXMLDocumentClick
+      end
     end
     object About1: TMenuItem
       Caption = 'About'
@@ -363,7 +384,7 @@ object Form1: TForm1
     Left = 76
     Top = 137
     Bitmap = {
-      494C010108000D00140010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010108000D00040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

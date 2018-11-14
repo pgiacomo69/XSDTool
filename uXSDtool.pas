@@ -24,7 +24,7 @@ uses
   Menus, ExtCtrls, ComCtrls, StdCtrls, xpDialogs,
   JanXMLParser2, ImgList, ActnList, ToolWin, MRUFList, SynEditHighlighter,
   SynHighlighterXML, SynEdit, SynMemo, SynHighlighterPas, SynEditCodeFolding,
-  System.ImageList, System.Actions;
+  System.ImageList, System.Actions,uXSDObj;
 
 type
   TForm1 = class(TForm)
@@ -81,6 +81,7 @@ type
     SynPasSyn1: TSynPasSyn;
     XOpenDialog1: TOpenDialog;
     About1: TMenuItem;
+    UseTXMLDocument: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure debug1Click(Sender: TObject);
@@ -99,6 +100,7 @@ type
     procedure acFindExecute(Sender: TObject);
     procedure mmXMLChange(Sender: TObject);
     procedure About1Click(Sender: TObject);
+    procedure UseTXMLDocumentClick(Sender: TObject);
   private
     { Private-Deklarationen }
     dom: tJanXMLParser2;
@@ -120,6 +122,7 @@ type
     procedure savereg;
     procedure FindXML(Sender: tObject);
     procedure FindCode(Sender: tObject);
+    Procedure WriteDelphiClasses(classdef:tClassDefs;aStream: tStream);
   protected
     procedure WMDropFiles(var msg: tMessage); message WM_DROPFILES;
   public
@@ -135,10 +138,10 @@ uses
   janStrings,
   shellapi,
   uXMLtools,
-  uXSDobj,
   uXSDParser,
   uWSDLobj,
-  uWSDLParser;
+  uWSDLParser,
+  uWriterDelphi;
 
 const
   RegKeyName = 'Software\XSDTool';
@@ -237,10 +240,19 @@ end;
 // ------------------------------------------------------------------
 // XSD parsing
 
+Procedure TForm1.WriteDelphiClasses(classdef:tClassDefs;aStream: tStream);
+
+begin
+
+
+end;
+
 procedure TForm1.parseSchema(xSchema: tJanXMLNode2);
 var
   Parser: tXSDParser;
   m: tMemoryStream;
+  writer:TDelphiClassWriter;
+
 begin // procedure parseSchema(dn:tJanXMLNode2)
   Parser := tXSDParser.Create(fn_xsd);
   if debug1.checked then
@@ -249,7 +261,11 @@ begin // procedure parseSchema(dn:tJanXMLNode2)
   Parser.parseSchema(xSchema);
 
   m := tMemoryStream.Create;
-  Parser.SaveToStream(m);
+  writer:=TDelphiClassWriter.create(parser.ClassDefs,UseTXMLDocument.Checked);
+  Parser.SaveToStream(m,Writer);
+
+  // Parser.SaveToStream(m,WriteDelphiClasses);
+
   m.Position := 0;
 
   PageControl1.ActivePage := tsCode;
@@ -387,6 +403,12 @@ begin
     (PageControl1.ActivePage = tsCode);
 end;
 
+procedure TForm1.UseTXMLDocumentClick(Sender: TObject);
+begin
+ UseTXMLDocument.Checked:=not UseTXMLDocument.Checked;
+ savereg;
+end;
+
 // ------------------------------------------------------------------
 // options
 
@@ -430,6 +452,7 @@ begin
     debug1.checked := ReadBool('Options', 'Debug', false);
     tsLog.TabVisible := debug1.checked;
     askoverride1.checked := Readbool('Options', 'AskBeforeOverride', true);
+    UseTXMLDocument.checked := Readbool('Options', 'UseTXMLDocument', false);
     promptaftersave1.checked := ReadBool('Options', 'PromptAfterSave', false);
   end;
   reg.Free;
@@ -445,6 +468,7 @@ begin
     WriteBool('Options', 'Debug', debug1.checked);
     Writebool('Options', 'AskBeforeOverride', askoverride1.checked);
     WriteBool('Options', 'PromptAfterSave', promptaftersave1.checked);
+    WriteBool('Options', 'UseTXMLDocument', UseTXMLDocument.checked);
   end;
   reg.Free;
 end;
@@ -581,7 +605,6 @@ begin
 
     SPos := mmXML.SelStart;
     SLen := mmXML.SelLength;
-
     SearchString := Copy(mmXML.Lines.Text,
       SPos + SLen + 1,
       TextLength - SLen + 1);

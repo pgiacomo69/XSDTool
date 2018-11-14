@@ -6,11 +6,16 @@ uses
   uXMLTools;
 {#BACKUP g:\proj5\delphi32\uxmlTools.pas }
 
+
 const
   cqualified = 'qualified';
   cunqualified = 'unqualified';
 
 type
+
+  tPropertyType=(ptSimple,ptComplex,ptEnum);
+  tClassDefs=class;
+  TWriteClasses=Procedure(classdef:tClassDefs;aStream: tStream);
   tProperty = class
   private
     FBase: string;
@@ -18,26 +23,26 @@ type
     FName: string;
     FNameSpace: string;
     FMaxOccurs: integer;
-    FSimple: boolean;
+    FPropertyType: tPropertyType;
     FMinOccurs: integer;
     function GetIsList: boolean;
     function GetIsOptional: boolean;
   public
     constructor Create(const aName, aType, aBase, aNSpc: string;
-      aMax, aMin: integer; bSimple: boolean);
-    procedure setIsComplex;
+      aMax, aMin: integer; bPropertyType: tPropertyType);
+    procedure setPropertyType(avalue:tPropertyType);
     property Name: string read FName;
-    property _Type: string read FType;
+    property _Type: string read FType write FType;
     property Base: string read FBase;
-    property NameSpace: string read FNameSpace;
+    property NameSpace: string read FNameSpace write FNameSpace;
     property maxOccurs: integer read FMaxOccurs;
     property minOccurs: integer read FMinOccurs;
-    property simple: boolean read FSimple;
+    property PropertyType: tPropertyType read FPropertyType;
     property IsOptional: boolean read GetIsOptional;
     property IsList: boolean read GetIsList;
   end;
 
-type
+
   tClassDef = class
   private
     FName: string;
@@ -53,10 +58,48 @@ type
     property IsExtensionOf: string read FIsExtensionOf write FIsExtensionOf;
   end;
 
-type
+
+  tEnumElement = class
+  private
+    FValue: string;
+    FDocumentation: String;
+  public
+    constructor Create(const aValue,aDocumentation: string);
+    property Value: String read FValue;
+    property Documentation: String read FDocumentation;
+  end;
+
+
+  tEnumDef = class
+  private
+    FName: string;
+    FNullValue: string;
+    FNullValueName: string;
+    FNullValueDoc: string;
+
+    FElements: TStringList;
+    fDocumented:Boolean;
+
+  public
+    constructor Create(const aName: string);
+    destructor Destroy; override;
+    function AddElement(const aValue,aDocumentation: string):TEnumElement;
+    property Elements: TStringList read FElements;
+    property Name: string read FName;
+    property Documented:Boolean read fDocumented;
+    property NullValue: string read FNullValue ;
+    property NullValueName: string read FNullValueName;
+    property NullValueDoc: string read FNullValueDoc;
+
+
+  end;
+
+
+
   tClassDefs = class(TStringList)
   private
     FOrdinals: tStringlist;
+    FEnums: tStringlist;
     FConsts: tStringlist;
     FUses: tStringlist;
     FIncludes: tStringlist;
@@ -67,18 +110,22 @@ type
     Fattributesqualified: boolean;
     FXSDTimestamp: string;
     FXSDFilename: string;
-    procedure SortClasses;
+
   public
     constructor Create;
     destructor Destroy; override;
     procedure Clear; override;
+    procedure SortClasses;
     procedure AddUses(const aUnit: string);
     procedure AddOrdinal(const sNewType, sBasicType: string);
     procedure AddConst(const sPrefix, sValue: string);
+    Function  AddEnum(const sName: string):tEnumDef;
     procedure AddInclude(const sAlias, sNamespace: string);
     procedure SaveToStream(aStream: tStream);
     //
     property Ordinals: tStringlist read FOrdinals; //  write FOrdinals;
+    property Enums: tStringlist read FEnums; //  write FOrdinals;
+    property Usess: tStringlist read FUses; //  write FOrdinals;
     property Consts: tStringlist read FConsts; //  write FConsts;
     property Includes: tStringlist read FIncludes;
     property bDebug: boolean read FbDebug write FbDebug;
@@ -109,6 +156,8 @@ const
   xsdExtension      = 'extension';
   xsdRestriction    = 'restriction';
   xsdEnumeration    = 'enumeration';
+  xsdAnnotation     = 'annotation';
+  xsdDocumentation  = 'documentation';
   xsdchoice         = 'choice';
   xsdeuse           = 'use';
  (* xsSchema         = 'schema';
@@ -208,6 +257,7 @@ const
   tabProp = '    property ';
   tabF = '    F';
   tabC = '  c';
+  tabt = '  t';
   tabEnd = '  end;';
 
 function CheckPascalReserved(const aPropName: string): string;
@@ -261,6 +311,40 @@ begin
   inherited;
 end;
 
+
+constructor tEnumElement.Create(const aValue,aDocumentation: string);
+begin
+  FValue:=aValue;
+  FDocumentation:=aDocumentation;
+end;
+
+
+constructor tEnumDef.Create(const aName: string);
+begin
+  FName := aName;
+  fDocumented:=False;
+  FElements := TStringlist.Create(True);
+  fnullvalue:='_NullValue_';
+  fnullvalueName:='te'+fname+'_NullValue_';
+  FNullValueDoc:=fname+ ' Null';
+  FElements.AddObject(fnullvalueName,tEnumElement.Create(fnullvalue,fnullvalueDoc));
+
+end;
+
+destructor tEnumDef.Destroy;
+begin
+  FElements.Free;
+  inherited;
+end;
+function tEnumDef.AddElement(const aValue,aDocumentation: string):TEnumElement;
+begin
+
+ result:=tEnumElement.Create(aValue,aDocumentation);
+ FElements.AddObject('te'+fname+Avalue,result);
+ fDocumented:=fDocumented or (aDocumentation<>'');
+end;
+
+
 function tClassDef.NumAttributeProperties: integer;
 var
   i: integer;
@@ -279,7 +363,7 @@ end;
 { tProperty }
 
 constructor tProperty.Create(const aName, aType, aBase, aNSpc: string;
-  aMax, aMin: integer; bSimple: boolean);
+  aMax, aMin: integer; bPropertyType: tPropertyType);
 begin
   FName := aName;
   FType := aType;
@@ -287,7 +371,7 @@ begin
   FNameSpace := aNSpc;
   FMaxOccurs := aMax;
   FMinOccurs := aMin;
-  FSimple := bSimple;
+  FPropertyType := bPropertyType;
 end;
 
 function tProperty.GetIsList: boolean;
@@ -300,9 +384,10 @@ begin
   result := minOccurs = 0;
 end;
 
-procedure tProperty.setIsComplex;
+procedure tProperty.setPropertyType(avalue:tPropertyType);
+
 begin
- Fsimple:=false;
+ FPropertyType:=aValue;
 end;
 
 { tClassDefs }
@@ -312,6 +397,7 @@ begin
   inherited;
   OwnsObjects := True;
   FOrdinals := tStringList.Create;
+  FEnums := tStringList.Create;
   FUses := tStringlist.Create;
   FUses.Sorted := true;
   FUses.Duplicates := dupIgnore;
@@ -322,7 +408,7 @@ end;
 destructor tClassDefs.Destroy;
 begin
   inherited;
-
+  FEnums.Free;
   FOrdinals.Free;
   FUses.Free;
   FConsts.Free;
@@ -348,6 +434,21 @@ begin
   if FOrdinals.IndexOf(s) < 0 then
     FOrdinals.Add(s);
 end;
+
+Function tClassDefs.AddEnum(const sName: string):tEnumDef;
+var s:string;
+    i:integer;
+begin
+ s := sName;
+ i:=FEnums.IndexOf(s);
+ if i<0 then
+  begin
+   result:=Tenumdef.Create(sname);
+   Fenums.AddObject(s,result);
+  end else result:= tEnumDef(FEnums.Objects[i]);
+
+end;
+
 
 procedure tClassDefs.Addconst(const sPrefix, sValue: string);
 begin
@@ -471,6 +572,37 @@ var
     oute(s + crlf);
   end;
 
+  procedure writeEnums;
+  var s:string;
+      e:TenumDef;
+      el:tEnumElement;
+      c,j:integer;
+  begin
+    if FEnums.Count > 0 then
+    begin
+      outline('// enumerations');
+      outline(TabType);
+      for c := 0 to FEnums.Count - 1 do
+      begin
+        e:=TEnumDef(fenums.Objects[c]);
+        s:=tabt+e.Name+' = (';
+        for j:= 0 to e.Elements.Count-1 do
+          begin
+            el:=tenumelement(e.elements[j]);
+            s:=s+e.Elements[j];
+            if j<e.Elements.Count-1 then   s:=s+',';
+
+
+          end;
+        s:=s+');';
+        outline(s);
+
+      end;
+
+      outline('');
+    end;
+  end;
+
 begin
   // =====================
   // WRITE THE UNIT HEADER
@@ -516,6 +648,7 @@ begin
         outline('  ' + StringReplace(FOrdinals[c], '=', ' = ', []) + ';');
       outline('');
     end;
+    WriteEnums;
 
     if FConsts.Count > 0 then
     begin
@@ -606,7 +739,7 @@ begin
           begin
             if bDebug then
               outline('//  ' + aProp._Type + ' = ' + s + ' / simple = ' + IntToStr(
-                ord(aProp.Simple)));
+                ord(aProp.PropertyType)));
             aProp.FType := s;
             // gp aProp.FSimple := true;
           end;
@@ -715,7 +848,7 @@ begin
       for p := 0 to aClass.Properties.Count - 1 do
       begin
         aProp := tProperty(aClass.Properties.Objects[p]);
-        if aProp.IsList and not aProp.simple then
+        if aProp.IsList and  (aProp.PropertyType=ptComplex) then
           outline('  a' + aProp.name + ': ' + aProp._type + ';');
       end;
       outline('begin');
@@ -803,7 +936,7 @@ begin
               oute('    else ')
             else
               oute('    ');
-            if aProp.simple then
+            if aProp.PropertyType=ptSimple then
               outline('if (sn = sn' + aClass.Name + '_' + aProp.name + ') then')
             else
             begin
@@ -814,7 +947,7 @@ begin
             if aProp.IsList then
             begin
               outline('    begin');
-              if aProp.simple then
+              if aProp.PropertyType=ptSimple then
               begin
                 outline('      // list of simple type');
                 outline('      F' + aProp.Name + '.Add(xn.text);');
@@ -828,7 +961,7 @@ begin
               end;
               outline('    end');
             end
-            else if aProp.simple then
+            else if aProp.PropertyType=ptSimple then
             begin
               if aProp._Type = dInteger then
                 outline('      ' + CheckPascalReserved(aProp.Name) + ' := ' +
@@ -882,7 +1015,7 @@ begin
       for p := 0 to aClass.Properties.Count - 1 do
       begin
         aProp := tProperty(aClass.Properties.Objects[p]);
-        if aProp.IsList or (not aProp.Simple) then
+        if aProp.IsList or (aProp.PropertyType=ptComplex) then
           outline('  F' + aProp.Name + '.Free;')
       end;
       outline('  inherited;');
@@ -1007,7 +1140,7 @@ begin
             begin
               outline('  // element "' + aProp.Name +
                 '" is TStringlist');
-              if aProp.simple then
+              if aProp.PropertyType=ptSimple then
                 outline('  // but of simple elements');
               outline('  if Assigned(F' + aProp.Name + ') then');
               outline('    for i:=0 to F' + aProp.Name + '.Count - 1 do');
@@ -1018,7 +1151,7 @@ begin
               else
                 outline('      xn := aNode.addChildByName('
                   + 'sn' + aClass.Name + '_' + aProp.name + ');');
-              if aProp.simple then
+              if aProp.PropertyType=ptSimple then
                 outline('      xn.text := F' + aProp.Name + '.Strings[i];')
               else
               begin
@@ -1029,7 +1162,7 @@ begin
             end
             else // no list
             begin
-              if aProp.simple then
+              if aProp.PropertyType=ptSimple then
               begin
                 if aProp.IsOptional then
                 begin

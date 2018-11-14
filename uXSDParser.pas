@@ -4,7 +4,8 @@ interface
 uses
   Classes,
   JanXMLParser2,
-  uXSDobj;
+  uXSDobj,
+  uWriterGen;
 {#BACKUP g:\proj5\delphi32\janxmlparser2.pas }
 
 type
@@ -21,6 +22,11 @@ type
     function TranslateType(const sType: string): string;
     procedure parseRestriction(xRest: tJanXMLNode2; const sPref: string);
     procedure parseProperties(xElement, dn: tJanXMLNode2);
+    procedure parseEnum(xRest: tJanXMLNode2; const enum:TenumDef);
+    procedure parseSimpleTypeBase(xElement, xSimple: tJanXMLNode2; bInClass:
+      boolean);
+    procedure parseSimpleTypeEnum(xElement, xSimpleEnum: tJanXMLNode2; bInClass:
+      boolean);
     procedure parseSimpleType(xElement, xSimple: tJanXMLNode2; bInClass:
       boolean);
     procedure parseSequence(dn: tJanXMLNode2; bInClass: boolean);
@@ -37,7 +43,9 @@ type
     constructor Create(const aFilename: string);
     destructor Destroy; override;
     procedure parseSchema(xSchema: tJanXMLNode2);
-    procedure SaveToStream(aStream: tStream);
+    procedure SaveToStream(aStream: tStream); overload;
+    procedure SaveToStream(aStream: tStream;writer:TWriteClasses); overload;
+    function SaveToStream(aStream: tStream;writer:TClassWriterGen):TOutputUnits; overload;
     property OnLogout: tLogProcedure read FOnLogout write FOnLogout;
     property ClassDefs: tClassDefs read FClassDefs;
   end;
@@ -144,19 +152,19 @@ begin
   end;
 end;
 
-procedure tXSDParser.parseSimpleType(xElement, xSimple: tJanXMLNode2; bInClass:
+procedure tXSDParser.parseSimpleTypeBase(xElement, xSimple: tJanXMLNode2; bInClass:
   boolean);
 var
   xRest: tJanXMLNode2;
   sElement: string;
   pt: string;
   p: tProperty;
-  simple: boolean;
+  propertyType: tPropertyType;
   sNs: string;
   iMax: integer;
   iMin: integer;
 begin
-  Logout('// parsesimpletype');
+  Logout('// parsesimpletypeBase');
   if Assigned(xElement) then
   begin
     sNs := xElement.attribute[xsmaxOccurs];
@@ -183,24 +191,140 @@ begin
   begin
     pt := xRest.attribute[xsRsBase];
     pt := TranslateType(pt);
-    simple := true;
+    propertyType := ptSimple;
     parseRestriction(xRest, sElement);
   end
   else
   begin
     pt := 't' + sElement;
-    simple := false;
+    propertyType := ptComplex;
   end;
 
   FClassDefs.AddOrdinal(sElement, pt);
   Logout('AddOrdinal ' + sElement + ',' + pt);
   if bInClass then
   begin
-    p := tProperty.Create(sElement, pt, 'E', '', iMax, iMin, simple);
+    p := tProperty.Create(sElement, pt, 'E', '', iMax, iMin, propertyType);
     FCurrentClass.Properties.AddObject(p.name, p);
     Logout('AddProperty ' + p.name);
   end;
 end;
+
+
+procedure tXSDParser.parseEnum(xRest: tJanXMLNode2; const enum:TenumDef);
+var
+  xEnum,Xann,Xdoc: tJanXMLNode2;
+  sVal,sDoc:string;
+begin
+  Logout('parseEnum');
+  xEnum := xRest.getChildByName(NSName(FxsdSchemaPrefix,xsdEnumeration));
+  if Assigned(xEnum) then
+    Logout('xEnum: ')
+  else
+    Logout('xEnum=NIL');
+  while Assigned(xEnum) and (xEnum.name = NSName(FxsdSchemaPrefix,xsdEnumeration)) do
+  begin
+    sVal := xEnum.attribute['value'];
+    xAnn := xEnum.getChildByName(NSName(FxsdSchemaPrefix,xsdAnnotation));
+    if assigned(xann) then
+     xDoc := xAnn.getChildByName(NSName(FxsdSchemaPrefix,xsdDocumentation));
+    if assigned(xdoc) then
+      sDoc:=trim(xDoc.text)
+     else
+      sDoc:='';
+    Logout(':' + sVal+','+sDoc);
+    enum.AddElement(sval,sdoc);
+    logout('AddElement ' + sVal + ',' + sDoc);
+    xEnum := xEnum.NextSibling;
+  end;
+end;
+
+
+procedure tXSDParser.parseSimpleTypeEnum(xElement, xSimpleEnum: tJanXMLNode2; bInClass:
+      boolean);
+
+
+
+var
+  dn2,xRest: tJanXMLNode2;
+
+  i: integer;
+  sName: string;
+  sNs: string;
+  iMax: integer;
+  iMin: integer;
+  fCurrentEnum:TEnumDef;
+  p: tProperty;
+  b: string;
+begin
+   Logout('// parsesimpletypeEnum');
+
+
+  if bInClass then
+    Logout('  (*');
+
+  // complex type needs to create a class header
+  if Assigned(xElement) then
+  begin
+    sName := xElement.attribute[xseName];
+    sNs := xElement.attribute[xsmaxOccurs];
+    imin := StrToIntDef(xElement.attribute[xsminOccurs], 1);
+    b := 'E';
+  end
+  else
+  begin
+    sName := xSimpleEnum.attribute[xseName];
+    sNs := xSimpleEnum.attribute[xsmaxOccurs];
+    imin := StrToIntDef(xSimpleEnum.attribute[xsminOccurs], 1);
+    b := 'A';
+  end;
+  if sNs = xsMunbounded then
+    iMax := cUnbounded
+  else
+    iMax := StrToIntDef(sNs, cScalar);
+
+  FCurrentEnum := FClassDefs.AddEnum(sName);
+  Logout('AddEnum ' + FCurrentEnum.Name);
+  xRest := xSimpleEnum.getChildByName(NSName(FxsdSchemaPrefix,xsdrestriction));
+   parseEnum(xRest,FCurrentEnum);
+
+
+
+
+  if bInClass then
+  begin
+    Logout('  *)');
+
+    // we need to create a property of the current declaration
+    p := tProperty.Create(sName, 'T' + sName, b, '', iMax, iMin, ptEnum);
+    FCurrentClass.Properties.AddObject(p.name, p);
+  end;
+end;
+
+
+
+procedure tXSDParser.parseSimpleType(xElement, xSimple: tJanXMLNode2; bInClass:
+      boolean);
+  var
+   xRest,xEnum: tJanXMLNode2;
+   t:TPropertyType;
+begin
+    Logout('// parsesimpletype');
+   t:=ptSimple;
+   xRest := xSimple.getChildByName(NSName(FxsdSchemaPrefix,xsdrestriction));
+   if assigned(xRest) then
+    begin
+      xEnum := xRest.getChildByName(NSName(FxsdSchemaPrefix,xsdEnumeration));
+       if Assigned(xEnum) then t:=ptEnum;
+
+    end;
+      case t of
+      ptSimple:parseSimpleTypeBase(xElement, xSimple,bInClass);
+      ptEnum: parseSimpleTypeEnum(xElement, xSimple,bInClass);
+    end;
+
+end;
+
 
 procedure tXSDParser.parseProperties(xElement: tJanXMLNode2; dn: tJanXMLNode2);
 var
@@ -319,7 +443,7 @@ begin
     pt := xExt.attribute[xsRsBase];
     pt := TranslateType(pt);
     // we need to create default property "value" of the current declaration
-    p := tProperty.Create('Value', pt, 'S', '', cScalar, 1, true);
+    p := tProperty.Create('Value', pt, 'S', '', cScalar, 1, ptSimple);
     FCurrentClass.Properties.AddObject(p.name, p);
 
     for c := 0 to xExt.nodes.Count - 1 do
@@ -405,7 +529,7 @@ begin
     Logout('  *)');
 
     // we need to create a property of the current declaration
-    p := tProperty.Create(sName, 'T' + sName, b, '', iMax, iMin, false);
+    p := tProperty.Create(sName, 'T' + sName, b, '', iMax, iMin, ptComplex);
     FCurrentClass.Properties.AddObject(p.name, p);
   end;
 end;
@@ -436,7 +560,7 @@ begin
   end;
   sType := translateType(sType);
 
-  p := tProperty.Create(sName, sType, 'A', '', cScalar, iMin, true);
+  p := tProperty.Create(sName, sType, 'A', '', cScalar, iMin, ptSimple);
   FCurrentClass.properties.AddObject(p.name, p);
 end;
 
@@ -467,7 +591,7 @@ var
       b := 'E'
     else
       b := 'X';
-    p := tProperty.Create(sRef, 'T' + sRef, b, sns, iMax, iMin, false);
+    p := tProperty.Create(sRef, 'T' + sRef, b, sns, iMax, iMin, ptComplex);
     FCurrentClass.Properties.AddObject(p.name, p);
   end;
 
@@ -541,7 +665,7 @@ begin // procedure parseElement(dn: tJanXMLNode2);
           begin
             sType := TranslateType(sType);
 
-            p := tProperty.Create(sElement, sType, 'E', '', iMax, iMin, true);
+            p := tProperty.Create(sElement, sType, 'E', '', iMax, iMin, ptSimple);
             FCurrentClass.Properties.AddObject(p.name, p);
           end
           else
@@ -600,7 +724,7 @@ end;
 
 procedure tXSDParser.parseSchema(xSchema: tJanXMLNode2);
 
-procedure SetCOmplexProperties;
+procedure SetPropertiesTypes;
 var i,j:integer;
     c:tClassDef;
     p:tProperty;
@@ -632,7 +756,12 @@ for i:=0 to  ClassDefs.Count-1 do
                      delete(t,1,1);
                      n:=0;
                      if ClassDefs.indexof(t)>=0 then
-                      p.SetIsComplex;
+                      p.setPropertyType(tPropertyType.ptComplex)
+                     else
+                      if ClassDefs.Enums.indexof(t)>=0 then
+                           p.setPropertyType(tPropertyType.ptEnum);
+
+
                     end;
                  end;
                end;
@@ -704,7 +833,7 @@ begin // procedure parseSchema(dn:tJanXMLNode2)
       parseSimpleType(nil, dn2, false)
         ;
   end;
-  SetComplexProperties;
+  SetPropertiesTypes;
 end; // procedure parseSchema(dn:tJanXMLNode2)
 
 constructor tXSDParser.Create(const aFilename: string);
@@ -726,6 +855,34 @@ begin
     FClassDefs.XSDTimeStamp := FormatDateTime('c',
       FileDateToDateTime(FileAge(FFilename)));
   FClassDefs.SaveToStream(aStream);
+end;
+
+procedure tXSDParser.SaveToStream(aStream: tStream;writer:TWriteClasses);
+begin
+  if assigned(writer) then
+   begin
+    FClassDefs.XSDFilename := FFilename;
+    if FileExists(FFilename) then
+      FClassDefs.XSDTimeStamp := FormatDateTime('c',
+        FileDateToDateTime(FileAge(FFilename)));
+    writer(FClassDefs,aStream);
+   end;
+end;
+
+
+function tXSDParser.SaveToStream(aStream: tStream;writer:TClassWriterGen):TOutputUnits;
+begin
+  if assigned(writer) then
+   begin
+    FClassDefs.XSDFilename := FFilename;
+    if FileExists(FFilename) then
+      FClassDefs.XSDTimeStamp := FormatDateTime('c',
+        FileDateToDateTime(FileAge(FFilename)));
+    result:=writer.Execute;
+    if length(result)>0 then result[0].aStream.SaveToStream(aStream);
+
+   end;
+
 end;
 
 end.

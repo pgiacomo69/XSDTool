@@ -13,7 +13,10 @@ uses
   uXSDobj in 'uXSDobj.pas',
   uXSDParser in 'uXSDParser.pas',
   uXSDtool in 'uXSDtool.pas' {Form1},
-  MRUFLIST in 'MRUFLIST.PAS';
+  MRUFLIST in 'MRUFLIST.PAS',
+  uWriterDelphiOld in 'uWriterDelphiOld.pas',
+  uWriterGen in 'uWriterGen.pas',
+  uWriterDelphi in 'uWriterDelphi.pas';
 
 {$R *.RES}
 
